@@ -19,6 +19,7 @@
           id="tracked-video"
           src="./video_3.mp4"
           preload="auto"
+          autoplay
           loop
           muted
           playsinline
@@ -45,28 +46,24 @@
         const video = document.getElementById("tracked-video");
         const scene = document.querySelector("a-scene");
 
-        // Debug video load
         video.addEventListener("loadeddata", () => {
-          console.log("✅ Video loaded:", video.videoWidth, "x", video.videoHeight);
+          console.log("Video is ready.");
         });
 
-        // Start video playback on target detection
         scene.addEventListener("targetFound", () => {
-          console.log("🎯 Target Found!");
-          video.play().catch((err) => {
-            console.warn("⚠️ Playback failed:", err);
-          });
+          console.log("Target Found!");
+          video.play();
         });
 
         scene.addEventListener("targetLost", () => {
-          console.log("👋 Target Lost.");
+          console.log("Target Lost!");
           video.pause();
         });
 
-        // iOS playback workaround
+        // iOS requires manual trigger for video
         const resumePlayback = () => {
           video.play().catch((err) =>
-            console.warn("⚠️ iOS playback blocked:", err)
+            console.warn("Playback error on iOS:", err)
           );
         };
         window.addEventListener("touchstart", resumePlayback, { once: true });
