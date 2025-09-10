@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>MUZEO AR</title>
+    <title>Dinner Guest AR</title>
 
     <!-- MindAR + A-Frame Libraries -->
     <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/dist/mindar-image.prod.js"></script>
@@ -28,7 +28,7 @@
   </head>
   <body>
     <a-scene
-      mindar-image="imageTargetSrc: 'https://rami-holo.github.io/muzeo/targets.mind'; filterMinCF: 0.1; filterBeta: 100"
+      mindar-image="imageTargetSrc: 'https://raman-djafari.github.io/dinnerguest-ar/targets.mind'; filterMinCF: 0.1; filterBeta: 100"
       embedded
       color-space="sRGB"
       renderer="colorManagement: true; physicallyCorrectLights: true"
@@ -39,7 +39,7 @@
       <a-assets>
         <video
           id="tracked-video"
-          src="https://rami-holo.github.io/muzeo/video_3.mp4"
+          src="https://raman-djafari.github.io/dinnerguest-ar/video_3.mp4"
           preload="auto"
           loop
           muted
@@ -87,7 +87,7 @@
         // iOS autoplay workaround
         const resumePlayback = () => {
           video.play().catch(err => {
-            console.warn("⚠️ Autoplay blocked:", err);
+            console.warn("⚠️ iOS autoplay blocked:", err);
           });
         };
 
