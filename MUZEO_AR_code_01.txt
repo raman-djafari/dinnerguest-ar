@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/dist/mindar-image.prod.js"></script>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  </head>
+  <body>
+    <a-scene
+      mindar-image="imageTargetSrc: https://cdn.glitch.global/a1c6dded-72e8-40e4-8885-83b6bbb9a206/targets%20(2).mind?v=1737625515379;"
+      vr-mode-ui="enabled: false"
+      device-orientation-permission-ui="enabled: false"
+    >
+      <a-assets>
+        <!-- Preload video with crossorigin -->
+        <video
+          id="tracked-video"
+          src="https://cdn.glitch.me/a1c6dded-72e8-40e4-8885-83b6bbb9a206/video_3.mp4?v=1737380272242"
+          loop
+          muted
+          playsinline
+          preload="auto"
+          crossorigin="anonymous"
+        ></video>
+      </a-assets>
+
+      <!-- AR Camera -->
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+      <!-- Target with Video -->
+      <a-entity mindar-image-target="targetIndex: 0">
+        <a-plane
+          id="video-plane"
+          material="shader: standard; src: #tracked-video"
+          position="0 0 0"
+          rotation="0 0 0"
+          width="1.08"
+          height="0.372"
+        ></a-plane>
+      </a-entity>
+    </a-scene>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const video = document.getElementById("tracked-video");
+        const scene = document.querySelector("a-scene");
+
+        // Debug: Log video load state
+        video.addEventListener("loadeddata", () => {
+          console.log("Video is preloaded and ready to play.");
+        });
+
+        // Enable video playback
+        const enablePlayback = () => {
+          if (video.paused) {
+            video.play()
+              .then(() => console.log("Video playback started"))
+              .catch((error) => console.error("Video playback failed:", error));
+          }
+        };
+
+        // Trigger playback on user interaction
+        window.addEventListener("click", enablePlayback, { once: true });
+        window.addEventListener("touchstart", enablePlayback, { once: true });
+
+        // Play video when target is found
+        scene.addEventListener("targetFound", () => {
+          console.log("Target Found! Starting video playback...");
+          enablePlayback();
+        });
+
+        // Pause video when target is lost
+        scene.addEventListener("targetLost", () => {
+          console.log("Target Lost! Pausing video playback...");
+          video.pause();
+        });
+
+        console.log("Setup complete. Ready for interaction or target detection.");
+      });
+    </script>
+  </body>
+</html>
+
+
+
