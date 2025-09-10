@@ -1,5 +1,7 @@
+<!DOCTYPE html>
 <html>
   <head>
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/dist/mindar-image.prod.js"></script>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
@@ -7,41 +9,69 @@
   </head>
   <body>
     <a-scene
-      mindar-image="imageTargetSrc:targets.mind"
+      mindar-image="imageTargetSrc: './targets.mind'; filterMinCF: 0.1; filterBeta: 100"
       vr-mode-ui="enabled: false"
       device-orientation-permission-ui="enabled: false"
     >
+      <!-- Preload assets -->
+      <a-assets>
+        <video
+          id="tracked-video"
+          src="./video_3.mp4"
+          preload="auto"
+          loop
+          muted
+          playsinline
+          crossorigin="anonymous"
+        ></video>
+      </a-assets>
+
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
       <a-entity mindar-image-target="targetIndex: 0">
-        <a-video
-          src=video_3.mp4
+        <a-plane
+          id="video-plane"
+          material="shader: standard; src: #tracked-video"
           position="0 0 0"
           rotation="0 0 0"
-          scale="1.6 0.552 1"
-          autoplay="true"
-          loop="true"
-          muted="true"
-          playsinline
-          material="shader: standard;"
-        ></a-video>
+          width="1.6"
+          height="0.552"
+        ></a-plane>
       </a-entity>
     </a-scene>
 
     <script>
       document.addEventListener("DOMContentLoaded", () => {
-        console.log("MindAR Initialized");
-      });
+        const video = document.getElementById("tracked-video");
+        const scene = document.querySelector("a-scene");
 
-      document.querySelector("a-scene").addEventListener("targetFound", () => {
-        console.log("Target Found!");
-      });
+        // Debug video load
+        video.addEventListener("loadeddata", () => {
+          console.log("✅ Video loaded:", video.videoWidth, "x", video.videoHeight);
+        });
 
-      document.querySelector("a-scene").addEventListener("targetLost", () => {
-        console.log("Target Lost!");
+        // Start video playback on target detection
+        scene.addEventListener("targetFound", () => {
+          console.log("🎯 Target Found!");
+          video.play().catch((err) => {
+            console.warn("⚠️ Playback failed:", err);
+          });
+        });
+
+        scene.addEventListener("targetLost", () => {
+          console.log("👋 Target Lost.");
+          video.pause();
+        });
+
+        // iOS playback workaround
+        const resumePlayback = () => {
+          video.play().catch((err) =>
+            console.warn("⚠️ iOS playback blocked:", err)
+          );
+        };
+        window.addEventListener("touchstart", resumePlayback, { once: true });
+        window.addEventListener("click", resumePlayback, { once: true });
       });
-      <a-scene mindar-image="filterMinCF:0.1; filterBeta: 100"/>
     </script>
   </body>
 </html>
-
-
