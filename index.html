@@ -1,34 +1,57 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MUZEO AR</title>
+
+    <!-- MindAR + A-Frame Libraries -->
     <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/dist/mindar-image.prod.js"></script>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+    <!-- Basic Styling -->
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+      }
+
+      a-scene {
+        width: 100%;
+        height: 100%;
+      }
+    </style>
   </head>
   <body>
     <a-scene
-      mindar-image="imageTargetSrc: https://cdn.glitch.global/a1c6dded-72e8-40e4-8885-83b6bbb9a206/targets%20(2).mind?v=1737625515379;"
+      mindar-image="imageTargetSrc: 'https://rami-holo.github.io/muzeo/targets.mind'; filterMinCF: 0.1; filterBeta: 100"
+      embedded
+      color-space="sRGB"
+      renderer="colorManagement: true; physicallyCorrectLights: true"
       vr-mode-ui="enabled: false"
       device-orientation-permission-ui="enabled: false"
     >
+      <!-- Preload video -->
       <a-assets>
-        <!-- Preload video with crossorigin -->
         <video
           id="tracked-video"
-          src="https://cdn.glitch.me/a1c6dded-72e8-40e4-8885-83b6bbb9a206/video_3.mp4?v=1737380272242"
+          src="https://rami-holo.github.io/muzeo/video_3.mp4"
+          preload="auto"
           loop
           muted
           playsinline
-          preload="auto"
           crossorigin="anonymous"
         ></video>
       </a-assets>
 
-      <!-- AR Camera -->
+      <!-- Camera -->
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-      <!-- Target with Video -->
+      <!-- Tracked video plane -->
       <a-entity mindar-image-target="targetIndex: 0">
         <a-plane
           id="video-plane"
@@ -41,46 +64,36 @@
       </a-entity>
     </a-scene>
 
+    <!-- Playback logic -->
     <script>
       document.addEventListener("DOMContentLoaded", () => {
         const video = document.getElementById("tracked-video");
         const scene = document.querySelector("a-scene");
 
-        // Debug: Log video load state
         video.addEventListener("loadeddata", () => {
-          console.log("Video is preloaded and ready to play.");
+          console.log("✅ Video loaded:", video.videoWidth, "x", video.videoHeight);
         });
 
-        // Enable video playback
-        const enablePlayback = () => {
-          if (video.paused) {
-            video.play()
-              .then(() => console.log("Video playback started"))
-              .catch((error) => console.error("Video playback failed:", error));
-          }
-        };
-
-        // Trigger playback on user interaction
-        window.addEventListener("click", enablePlayback, { once: true });
-        window.addEventListener("touchstart", enablePlayback, { once: true });
-
-        // Play video when target is found
         scene.addEventListener("targetFound", () => {
-          console.log("Target Found! Starting video playback...");
-          enablePlayback();
+          console.log("🎯 Target Found!");
+          video.play().catch(err => console.warn("⚠️ Playback error:", err));
         });
 
-        // Pause video when target is lost
         scene.addEventListener("targetLost", () => {
-          console.log("Target Lost! Pausing video playback...");
+          console.log("👋 Target Lost");
           video.pause();
         });
 
-        console.log("Setup complete. Ready for interaction or target detection.");
+        // iOS autoplay workaround
+        const resumePlayback = () => {
+          video.play().catch(err => {
+            console.warn("⚠️ Autoplay blocked:", err);
+          });
+        };
+
+        window.addEventListener("touchstart", resumePlayback, { once: true });
+        window.addEventListener("click", resumePlayback, { once: true });
       });
     </script>
   </body>
 </html>
-
-
-
