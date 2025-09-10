@@ -5,30 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Raman Djafari, The Missing Dinner Guest</title>
 
-    <!-- MindAR + A-Frame Libraries -->
-    <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/dist/mindar-image.prod.js"></script>
+    <!-- Only A-Frame + MindAR A-Frame build (no duplicate core include) -->
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
-    <!-- Basic Styling -->
     <style>
-      html, body {
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-        width: 100%;
-        height: 100%;
-      }
-
-      a-scene {
-        width: 100%;
-        height: 100%;
-      }
+      html, body { margin:0; padding:0; overflow:hidden; width:100%; height:100%; }
+      a-scene { width:100%; height:100%; }
     </style>
   </head>
   <body>
     <a-scene
-      mindar-image="imageTargetSrc: 'https://raman-djafari.github.io/dinnerguest-ar/targets%20(2).mind'; filterMinCF: 0.1; filterBeta: 100"
+      mindar-image="imageTargetSrc: ./targets%20(2).mind; filterMinCF: 0.1; filterBeta: 100"
       embedded
       color-space="sRGB"
       renderer="colorManagement: true; physicallyCorrectLights: true"
@@ -36,10 +24,10 @@
       device-orientation-permission-ui="enabled: false"
     >
       <!-- Preload video -->
-      <a-assets>
+      <a-assets timeout="15000">
         <video
           id="tracked-video"
-          src="https://raman-djafari.github.io/dinnerguest-ar/video_3.mp4"
+          src="./video_3.mp4"
           preload="auto"
           loop
           muted
@@ -51,7 +39,7 @@
       <!-- Camera -->
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-      <!-- Tracked video plane -->
+      <!-- Target -->
       <a-entity mindar-image-target="targetIndex: 0">
         <a-plane
           id="video-plane"
@@ -64,19 +52,19 @@
       </a-entity>
     </a-scene>
 
-    <!-- Playback logic -->
     <script>
+      // Minimal playback helpers + useful logging
       document.addEventListener("DOMContentLoaded", () => {
         const video = document.getElementById("tracked-video");
         const scene = document.querySelector("a-scene");
 
         video.addEventListener("loadeddata", () => {
-          console.log("✅ Video loaded:", video.videoWidth, "x", video.videoHeight);
+          console.log("✅ Video ready:", video.videoWidth, "x", video.videoHeight);
         });
 
         scene.addEventListener("targetFound", () => {
-          console.log("🎯 Target Found!");
-          video.play().catch(err => console.warn("⚠️ Playback error:", err));
+          console.log("🎯 Target Found");
+          video.play().catch(err => console.warn("⚠️ play() failed:", err));
         });
 
         scene.addEventListener("targetLost", () => {
@@ -84,17 +72,11 @@
           video.pause();
         });
 
-        // iOS autoplay workaround
-        const resumePlayback = () => {
-          video.play().catch(err => {
-            console.warn("⚠️ Autoplay blocked:", err);
-          });
-        };
-
-        window.addEventListener("touchstart", resumePlayback, { once: true });
-        window.addEventListener("click", resumePlayback, { once: true });
+        // iOS / Android user-gesture nudge
+        const nudge = () => video.play().catch(()=>{});
+        window.addEventListener("touchstart", nudge, { once: true });
+        window.addEventListener("click", nudge, { once: true });
       });
     </script>
   </body>
 </html>
-
